@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./Roles.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
@@ -20,27 +21,24 @@ contract Citizenship is Context,
 
     event BaseURIChanged(address indexed by, string uri);
 
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
-
     Counters.Counter private _citizenshipIdTracker;
 
     string private _baseTokenURI;
 
-    constructor(string memory name,
-                string memory symbol,
-                string memory baseTokenURI,
-                address[] memory admins
-                ) ERC721(name, symbol) {
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory baseTokenURI,
+        address[] memory admins
+    ) ERC721(name, symbol) {
         _baseTokenURI = baseTokenURI;
 
         for (uint i = 0; i < admins.length; i++) {
             _setupRole(DEFAULT_ADMIN_ROLE, admins[i]);
             
-            _setupRole(MINTER_ROLE, admins[i]);
-            _setupRole(PAUSER_ROLE, admins[i]);
-            _setupRole(URI_SETTER_ROLE, admins[i]);
+            _setupRole(Roles.MINTER_ROLE, admins[i]);
+            _setupRole(Roles.PAUSER_ROLE, admins[i]);
+            _setupRole(Roles.URI_SETTER_ROLE, admins[i]);
 
             _mint(admins[i], _citizenshipIdTracker.current());
             _citizenshipIdTracker.increment();
@@ -52,7 +50,7 @@ contract Citizenship is Context,
     }
 
     function setBaseURI(string memory uri) public returns (bool) {
-        require(hasRole(URI_SETTER_ROLE, _msgSender()), "Citizenship: must have URI setter role");
+        require(hasRole(Roles.URI_SETTER_ROLE, _msgSender()), "Citizenship: must have URI setter role");
 
         _baseTokenURI = uri;
         emit BaseURIChanged(_msgSender(), uri);
@@ -61,26 +59,27 @@ contract Citizenship is Context,
     }
 
     function mint(address to) public virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "Citizenship: must have minter role to mint");
+        require(hasRole(Roles.MINTER_ROLE, _msgSender()), "Citizenship: must have minter role to mint");
 
         _mint(to, _citizenshipIdTracker.current());
         _citizenshipIdTracker.increment();
     }
 
     function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "Citizenship: must have pauser role to pause");
+        require(hasRole(Roles.PAUSER_ROLE, _msgSender()), "Citizenship: must have pauser role to pause");
         _pause();
     }
 
     function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "Citizenship: must have pauser role to unpause");
+        require(hasRole(Roles.PAUSER_ROLE, _msgSender()), "Citizenship: must have pauser role to unpause");
         _unpause();
     }
 
-    function _beforeTokenTransfer(address from,
-                                  address to,
-                                  uint256 tokenId
-                                  ) internal virtual override(ERC721, ERC721Enumerable, ERC721Pausable) {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override(ERC721, ERC721Enumerable, ERC721Pausable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
@@ -92,6 +91,12 @@ contract Citizenship is Context,
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    function _writeProposalToLedger(uint256 index) private {
+    }
+
+    function _passProposalInLedger(uint256 index) private {
     }
 
 }
