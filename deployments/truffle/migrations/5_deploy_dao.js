@@ -10,9 +10,7 @@ module.exports = async function (deployer, network, accounts) {
     citizenship = await Citizenship.deployed();
     ledger = await CitizenDaoLedger.deployed();
     await deployer.deploy(CitizenDao, citizenToken.address, citizenship.address, ledger.address, 4096,
-                         ["0x988d8D5Ca1063bD8c5fF7E0f4aFbEBEe4Ab8CFFE",
-                          "0xAF90A0D9A2573eE956A278565ee8157934F3Fa9D",
-                          "0x8e7DD33F31aDb21Ec2Eb3f819775B362F6Bb9B28"]);
+                         [accounts[0]]);
     dao = await CitizenDao.deployed();
     await citizenToken.grantRole(MINTER_ROLE, dao.address);
     await ledger.grantRole(LEDGER_WRITER_ROLE, dao.address);

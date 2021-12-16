@@ -27,7 +27,7 @@ contract CitizenToken is Context, AccessControlEnumerable, ERC20Votes, ERC20Burn
             _setupRole(DEFAULT_ADMIN_ROLE, admins[i]);
             _setupRole(Roles.PAUSER_ROLE, admins[i]);
 
-            _mint(admins[i], 1 * 10**decimals());
+            _mint(admins[i], 1000000 * 10**decimals());
         }
         mintable = true;
         pausable = true;
